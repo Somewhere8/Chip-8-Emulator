@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <SDL3/SDL.h>
 #define SCALE   10
-const double fps_ms = 100/6;
+const double fps_ms = 100.0/6;
 bool waitForFileDialog = true;
 char* filePath;
 static void SDLCALL callback(void* userdata, const char* const* filelist, int filter) {
@@ -39,9 +39,7 @@ int main(int argc, char* argv[]) {
     reg.PC = 0x200;
     
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
-    SDL_Window* window = SDL_CreateWindow("Chip-8", HORIZONTAL_SIZE * SCALE, VERTICAL_SIZE * SCALE, 
-        SDL_WINDOW_OPENGL
-    );
+    SDL_Window* window = SDL_CreateWindow("Chip-8", HORIZONTAL_SIZE * SCALE, VERTICAL_SIZE * SCALE,  0);
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, NULL); 
     SDL_RenderClear(renderer);
