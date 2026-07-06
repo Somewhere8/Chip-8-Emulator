@@ -5,6 +5,7 @@
 #define NUM_KEYS       16
 #define DISPLAY_W      64
 #define DISPLAY_H      32
+#define BYTE            8
 #define PCINC           2
 #define KEYPRESS        1
 typedef enum {

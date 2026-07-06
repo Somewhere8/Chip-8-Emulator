@@ -4,12 +4,23 @@
 #include "keys.h"
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <SDL3/SDL.h>
 #define SCALE   10
 int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        SDL_Log("Usage: %s <rom_path>", argv[0]);
+        return -1;
+    }
     FILE* rom = fopen(argv[1], "rb");
+    if(rom == NULL){
+        fprintf(stderr, "Failed to open file (fnf)");
+        return -1;
+    }
+    
     fseek(rom, 0, SEEK_END);
     long romSize = ftell(rom);
+    fseek(rom, 0, SEEK_SET);
     uint8_t* romBuffer = malloc(romSize);
     fread(romBuffer, 1, romSize, rom);
     loadROM(romBuffer, romSize);
@@ -28,12 +39,29 @@ int main(int argc, char* argv[]) {
 
     bool isRunning = true;
     SDL_Event event;
-
     //main loop
     while (isRunning) {
-        SDL_Delay(16);
+        uint16_t opcode = (mem[reg.PC] << 8) | mem[reg.PC + 1];
+        //printf("PC: %04X  Opcode: %04X  DT: %d\n", reg.PC, opcode, reg.DT);
+        chip8(opcode);
+        
+
+        if (reg.DT > 0) reg.DT--;
+        if (reg.ST > 0) reg.ST--;
+
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        for (int y = 0; y < VERTICAL_SIZE; y++) {
+            for (int x = 0; x < HORIZONTAL_SIZE; x++) {
+                if (display[y * HORIZONTAL_SIZE + x]) {
+                    SDL_FRect rect = { x * SCALE, y * SCALE, SCALE, SCALE };
+                    SDL_RenderFillRect(renderer, &rect);
+                }
+            }
+        }
         SDL_RenderPresent(renderer);
-        chip8(mem[reg.PC]);
+
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_EVENT_QUIT) {
                 isRunning = false;
@@ -79,6 +107,7 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
+        SDL_Delay(2);
     }
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);

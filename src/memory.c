@@ -1,5 +1,5 @@
 #include "memory.h"
-uint16_t mem[MEMORY_SIZE];
+uint8_t mem[MEMORY_SIZE];
 uint16_t stack[STACK_SIZE];
 
 const uint8_t fontSet[80] = {
@@ -21,7 +21,7 @@ const uint8_t fontSet[80] = {
     0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
-void loadFont(uint8_t *font, size_t size) {
+void loadFont(const uint8_t *font, size_t size) {
     for(size_t i = 0; i < size; i++)
         mem[i] = font[i];
 }

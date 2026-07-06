@@ -11,6 +11,7 @@ void chip8(uint16_t input) {
     uint8_t x = (input >> 8) & 0x000F;
     uint8_t y = (input >> 4) & 0x000F;
     uint8_t kk = input & 0x00FF;
+    reg.PC += PCINC;
     switch (checkcase) {
         case 0x0000:
             switch (input) {
@@ -70,26 +71,27 @@ void chip8(uint16_t input) {
                     break;
                 case (ADD_VX_VY):
                     int sum = reg.V[x] + reg.V[y];
-                    reg.V[15] = sum > 0xFF ? 1 : 0;
                     reg.V[x] = sum & 0xFF;
+                    reg.V[15] = sum > 0xFF ? 1 : 0;
                     break;
                 case (SUB):
-                    reg.V[15] = reg.V[x] >= reg.V[y] ? 1 : 0;
                     reg.V[x] -= reg.V[y];
+                    reg.V[15] = reg.V[x] >= reg.V[y] ? 1 : 0;
                     break;
                 case (SHR): //Config the shift??? vy = vx or vx in place
                     //reg.V[x] = reg.V[y];
-                    reg.V[15] = reg.V[x] & 0x1;
                     reg.V[x] >>= 1;
+                    reg.V[15] = reg.V[x] & 0x1;
                     break;
                 case (SUBN):
-                    reg.V[15] = reg.V[y] >= reg.V[x] ? 1 : 0;
                     reg.V[x] = reg.V[y] - reg.V[x];
+                    reg.V[15] = reg.V[y] >= reg.V[x] ? 1 : 0;
+                    
                     break;
                 case (SHL): //Config the shift??? vy = vx or vx in place
                     //reg.V[x] = reg.V[y];
-                    reg.V[15] = (reg.V[x] >> 7) & 0x1;
                     reg.V[x] <<= 1;
+                    reg.V[15] = (reg.V[x] >> 7) & 0x1;
                     break;
             }
             break;
@@ -114,14 +116,15 @@ void chip8(uint16_t input) {
                 if(ypos + i >= VERTICAL_SIZE)
                     break;
                 uint8_t sprite = mem[reg.I + i];
-                for(int j = 0; j < sizeof(uint8_t); j++) {
+                for(int j = 0; j < BYTE; j++) {
                     if(xpos + j >= HORIZONTAL_SIZE)
                         break;
-                    uint8_t checkbits = sprite & (1 << (sizeof(uint8_t) - 1 - j));
-                    if(checkbits != 0 && display[(ypos + i) * HORIZONTAL_SIZE + (xpos + j)] == 1) {
-                        reg.V[15] = 1;
+                    uint8_t checkbits = sprite & (1 << (BYTE - 1 - j));
+                    if(checkbits){
+                        if(display[(ypos + i) * HORIZONTAL_SIZE + (xpos + j)] == 1)
+                            reg.V[15] = 1;
+                        display[(ypos + i) * HORIZONTAL_SIZE + (xpos + j)] ^= 1;
                     }
-                    display[(ypos + i) * HORIZONTAL_SIZE + (xpos + j)] ^= 1;
                 }
             }
 
@@ -171,7 +174,7 @@ void chip8(uint16_t input) {
                     reg.I = reg.V[x] * 5;
                     break;
                 case (LD_B_VX):
-                    mem[reg.I] = reg.V[x] % 100;
+                    mem[reg.I] = reg.V[x] / 100;
                     mem[reg.I + 1] = (reg.V[x] / 10) % 10;
                     mem[reg.I + 2] = reg.V[x] % 10;
                     break;

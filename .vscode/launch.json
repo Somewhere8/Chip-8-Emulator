@@ -1,0 +1,22 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+            {
+                "name": "Debug Chip8",
+                "type": "cppvsdbg",
+                "request": "launch",
+                "program": "${workspaceFolder}\\main.exe",
+                "args": ["Rom\\Br8kout.ch8"],
+                "stopAtEntry": false,
+                "cwd": "${workspaceFolder}",
+                "environment": [],
+                "console": "integratedTerminal",
+                "preLaunchTask": "C/C++: clang.exe build active file"
+            }
+        ],
+    "args" : ["Rom\\Br8kout.ch8"],
+    "cwd": "${workspaceFolder}"
+}

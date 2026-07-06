@@ -8,9 +8,17 @@
                 "-fcolor-diagnostics",
                 "-fansi-escape-codes",
                 "-g",
-                "${file}",
+                "${workspaceFolder}\\src\\main.c",
+                "${workspaceFolder}\\src\\cpu.c",
+                "${workspaceFolder}\\src\\keys.c",
+                "${workspaceFolder}\\src\\display.c",
+                "${workspaceFolder}\\src\\memory.c",
+                "-I${workspaceFolder}\\sdl",
+                "-L${workspaceFolder}\\sdl\\lib",
+                "-lSDL3",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${workspaceFolder}\\main.exe"
+                
             ],
             "options": {
                 "cwd": "${fileDirname}"
