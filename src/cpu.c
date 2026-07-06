@@ -4,7 +4,7 @@
 #include "keys.h"
 Register reg = {0};
 
-void chip8(uint16_t input) {
+void execute(uint16_t input) {
     uint16_t checkcase = input & 0xF000;
     uint16_t nnn = input & 0x0FFF;
     uint8_t n = input & 0x000F;

@@ -1,3 +1,6 @@
+#ifdef _MSC_VER
+# pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
+#endif
 #include "cpu.h"
 #include "memory.h"
 #include "display.h"
@@ -7,17 +10,23 @@
 #include <stdlib.h>
 #include <SDL3/SDL.h>
 #define SCALE   10
+const double fps_ms = 100/6;
+bool waitForFileDialog = true;
+char* filePath;
+static void SDLCALL callback(void* userdata, const char* const* filelist, int filter) {
+    waitForFileDialog = false;
+    if(filelist != NULL)
+        filePath = filelist[0];
+}
+
 int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        SDL_Log("Usage: %s <rom_path>", argv[0]);
-        return -1;
-    }
-    FILE* rom = fopen(argv[1], "rb");
+    SDL_ShowOpenFileDialog(callback, NULL, NULL, (SDL_DialogFileFilter[]){"Chip-8 Rom" , "ch8"}, 1, NULL, false);
+    while(waitForFileDialog){};
+    FILE* rom = fopen(filePath, "rb");
     if(rom == NULL){
         fprintf(stderr, "Failed to open file (fnf)");
         return -1;
     }
-    
     fseek(rom, 0, SEEK_END);
     long romSize = ftell(rom);
     fseek(rom, 0, SEEK_SET);
@@ -40,14 +49,21 @@ int main(int argc, char* argv[]) {
     bool isRunning = true;
     SDL_Event event;
     //main loop
+    uint64_t lastTick = SDL_GetTicks();
     while (isRunning) {
-        uint16_t opcode = (mem[reg.PC] << 8) | mem[reg.PC + 1];
-        //printf("PC: %04X  Opcode: %04X  DT: %d\n", reg.PC, opcode, reg.DT);
-        chip8(opcode);
+        uint64_t frameStart = SDL_GetTicks();
+        for (int i = 0; i < 700 / fps_ms; i++){
+            uint16_t opcode = (mem[reg.PC] << 8) | mem[reg.PC + 1];
+            //printf("PC: %04X  Opcode: %04X  DT: %d\n", reg.PC, opcode, reg.DT);
+            execute(opcode);
+        }
         
-
-        if (reg.DT > 0) reg.DT--;
-        if (reg.ST > 0) reg.ST--;
+        uint64_t curr = SDL_GetTicks();
+        while(curr - lastTick >= fps_ms){
+            if (reg.DT > 0) reg.DT--;
+            if (reg.ST > 0) reg.ST--;
+            lastTick += (uint64_t)fps_ms;
+        }
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
@@ -107,7 +123,10 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-        SDL_Delay(2);
+        uint64_t totalFrame = SDL_GetTicks() - frameStart;
+        if(totalFrame < 16)
+            SDL_Delay(16 - totalFrame);
+
     }
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);

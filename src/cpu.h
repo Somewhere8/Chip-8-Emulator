@@ -75,4 +75,4 @@ typedef struct {
 
 extern Register reg;
 
-extern void chip8(uint16_t input);
+extern void execute(uint16_t input);
